@@ -219,7 +219,7 @@ export default function Portfolio() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-x-0 top-16 z-50 bg-black backdrop-blur-md border-b border-purple-500/20 md:hidden"
+            className="fixed inset-x-0 top-16 z-50 bg-black/20 backdrop-blur-md border-b border-purple-500/20 md:hidden"
           >
             <div className="container mx-auto px-4 py-4">
               <div className="flex flex-col gap-2">
