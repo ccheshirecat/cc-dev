@@ -39,7 +39,7 @@ export function Projects() {
  ]
 
  return (
-   <section id="projects" className="py-20">
+   <section id="projects" className="py-20 relative z-10">
      <div className="container mx-auto px-4 max-w-5xl">
        <motion.div
          initial={{ opacity: 0, y: 20 }}
@@ -49,10 +49,10 @@ export function Projects() {
          className="text-center mb-12"
        >
          <h2 className="text-4xl font-bold text-purple-400 mb-4">
-           i swear
+           projects
          </h2>
          <p className="text-purple-300 max-w-xl mx-auto">
-          proof im not making this shit up just to take your money and gamble hehe(ok maybe abit)
+          some examples of what i get up to when im bored and have no bullet
 
          </p>
        </motion.div>

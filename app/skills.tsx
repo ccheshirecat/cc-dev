@@ -73,10 +73,10 @@ export function Skills() {
          className="text-center mb-12"
        >
          <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent mb-4">
-           blablabla
+           skills
          </h2>
          <p className="text-purple-300/60 max-w-xl mx-auto">
-         more stuff to convince u to faster sen
+         tbh not sure whats the purpose of this but lotta people have it then i fomo
 
          </p>
        </motion.div>

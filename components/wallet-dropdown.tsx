@@ -39,29 +39,29 @@ export function WalletDropdown({ selectedCrypto, onSelectCrypto, onNotification 
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const randomAmount = (Math.random() * (500 - 50) + 50).toFixed(2)
-      const randomCrypto = balances[Math.floor(Math.random() * balances.length)]
+      const randomAmount = (Math.random() * (500 - 50) + 50).toFixed(2);
+      const randomCrypto = balances[Math.floor(Math.random() * balances.length)];
       
-      onNotification(`@cheshirecat tipped you $${randomAmount} in ${randomCrypto.symbol}`, 'success')
-
       setBalances(prevBalances => 
         prevBalances.map(crypto => 
           crypto.symbol === randomCrypto.symbol
             ? { ...crypto, balance: (parseFloat(crypto.balance) + parseFloat(randomAmount)).toFixed(2) }
             : crypto
         )
-      )
+      );
 
       if (selectedCrypto.symbol === randomCrypto.symbol) {
         onSelectCrypto({
           ...selectedCrypto,
           balance: (parseFloat(selectedCrypto.balance) + parseFloat(randomAmount)).toFixed(2)
-        })
+        });
       }
-    }, 3000)
 
-    return () => clearTimeout(timer)
-  }, [])
+      onNotification(`@cheshirecat tipped you $${randomAmount} in ${randomCrypto.symbol}`, 'success');
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCryptoSelect = (crypto: CryptoBalance) => {
     onSelectCrypto(crypto)

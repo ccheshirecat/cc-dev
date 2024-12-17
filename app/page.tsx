@@ -44,79 +44,8 @@ export default function Portfolio() {
 
   useEffect(() => {
     // Generate intricate pattern
-    const generateIntricatePattern = () => {
-      const svgWidth = window.innerWidth;
-      const svgHeight = window.innerHeight;
-      const cellSize = 50; // Reduced cell size for better visibility
-      const lineOpacity = 0.05; // Reduced opacity for subtlety
+    //Removed generateIntricatePattern function and related code
 
-      let pattern = '';
-
-      for (let x = 0; x < svgWidth; x += cellSize) {
-        for (let y = 0; y < svgHeight; y += cellSize) {
-          // Randomly choose between square, diamond, or hexagon
-          const shapeType = Math.floor(Math.random() * 3);
-          
-          switch (shapeType) {
-            case 0: // Square
-              pattern += generateSquare(x, y, cellSize, lineOpacity);
-              break;
-            case 1: // Diamond
-              pattern += generateDiamond(x, y, cellSize, lineOpacity);
-              break;
-            case 2: // Hexagon
-              pattern += generateHexagon(x, y, cellSize, lineOpacity);
-              break;
-          }
-        }
-      }
-
-      return pattern;
-    };
-
-    const generateSquare = (x: number, y: number, size: number, opacity: number) => {
-      return `
-        <rect x="${x}" y="${y}" width="${size}" height="${size}" 
-              fill="none" stroke="#C4B5E0" stroke-width="0.5" opacity="${opacity}" />
-      `;
-    };
-
-    const generateDiamond = (x: number, y: number, size: number, opacity: number) => {
-      const centerX = x + size / 2;
-      const centerY = y + size / 2;
-      return `
-        <polygon points="${centerX},${y} ${x + size},${centerY} ${centerX},${y + size} ${x},${centerY}"
-                 fill="none" stroke="#C4B5E0" stroke-width="0.5" opacity="${opacity}" />
-      `;
-    };
-
-    const generateHexagon = (x: number, y: number, size: number, opacity: number) => {
-      const centerX = x + size / 2;
-      const centerY = y + size / 2;
-      const hexPoints = [];
-      for (let i = 0; i < 6; i++) {
-        const angle = (Math.PI / 3) * i;
-        const hx = centerX + (size / 2) * Math.cos(angle);
-        const hy = centerY + (size / 2) * Math.sin(angle);
-        hexPoints.push(`${hx},${hy}`);
-      }
-      return `
-        <polygon points="${hexPoints.join(' ')}"
-                 fill="none" stroke="#C4B5E0" stroke-width="0.5" opacity="${opacity}" />
-      `;
-    };
-
-    setIntricatePattern(generateIntricatePattern());
-
-    const handleResize = () => {
-      setIntricatePattern(generateIntricatePattern());
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
   }, []);
 
   const handlePlay = (amount: number) => {
@@ -144,7 +73,7 @@ export default function Portfolio() {
       balance: (parseFloat(prev.balance) + winAmount).toFixed(2)
     }))
     setNotification({
-      message: `Congratulations! You won ${winAmount} ${selectedCrypto.symbol}`,
+      message: `Congratulations! You won $${winAmount} in ${selectedCrypto.symbol}`,
       isVisible: true,
       type: 'success'
     });
@@ -152,60 +81,80 @@ export default function Portfolio() {
 
   return (
     <>
-      {/* Animated background with intricate pattern */}
+      {/* Animated background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <svg
-          className="absolute inset-0 w-full h-full"
-          xmlns="http://www.w3.org/2000/svg"
-          dangerouslySetInnerHTML={{ __html: intricatePattern }}
-        />
+        {/* Base gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-black to-purple-950" />
 
-        {/* Subtle gradient overlay */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(circle at 30% 50%, rgba(30, 10, 60, 0.2), rgba(10, 5, 25, 0.3))',
-            mixBlendMode: 'soft-light'
-          }}
-        />
-        
-        {/* Animated particles */}
-        <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="particle-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-              <stop offset="0%" stopColor="rgba(255, 255, 255, 0.15)" />
-              <stop offset="100%" stopColor="rgba(255, 255, 255, 0)" />
-            </radialGradient>
-          </defs>
+        {/* Animated slot symbols */}
+        <div className="absolute inset-0 opacity-20">
           {[...Array(20)].map((_, index) => (
-            <motion.circle
+            <motion.div
               key={index}
-              r={Math.random() * 4 + 1}
-              fill="url(#particle-gradient)"
+              className="absolute"
               initial={{
-                x: Math.random() * 100 + '%',
-                y: Math.random() * 100 + '%',
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                rotate: Math.random() * 360,
+                scale: Math.random() * 0.5 + 0.5,
               }}
               animate={{
-                x: [
-                  Math.random() * 100 + '%',
-                  Math.random() * 100 + '%',
-                  Math.random() * 100 + '%',
-                ],
-                y: [
-                  Math.random() * 100 + '%',
-                  Math.random() * 100 + '%',
-                  Math.random() * 100 + '%',
-                ],
+                top: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
+                left: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
+                rotate: [0, 360],
+                scale: [Math.random() * 0.5 + 0.5, Math.random() * 0.5 + 0.5],
               }}
               transition={{
                 duration: Math.random() * 20 + 10,
                 repeat: Infinity,
-                ease: 'linear',
+                ease: "linear",
+              }}
+            >
+              <Image
+                src={index % 3 === 0 ? "/cat.svg" : index % 3 === 1 ? "/dog.svg" : "/fox.svg"}
+                alt="Slot Symbol"
+                width={40}
+                height={40}
+              />
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Glowing orbs */}
+        <div className="absolute inset-0">
+          {[...Array(5)].map((_, index) => (
+            <motion.div
+              key={index}
+              className="absolute rounded-full bg-purple-400 opacity-20 blur-xl"
+              style={{
+                width: `${Math.random() * 200 + 100}px`,
+                height: `${Math.random() * 200 + 100}px`,
+              }}
+              initial={{
+                x: `${Math.random() * 100}%`,
+                y: `${Math.random() * 100}%`,
+              }}
+              animate={{
+                x: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
+                y: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
+              }}
+              transition={{
+                duration: Math.random() * 20 + 10,
+                repeat: Infinity,
+                ease: "linear",
               }}
             />
           ))}
-        </svg>
+        </div>
+
+        {/* Subtle grid overlay */}
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `linear-gradient(to right, #8b5cf6 1px, transparent 1px), linear-gradient(to bottom, #8b5cf6 1px, transparent 1px)`,
+            backgroundSize: '20px 20px',
+          }}
+        />
       </div>
 
       {/* Navigation */}
@@ -328,8 +277,8 @@ export default function Portfolio() {
                 </motion.div>
               </h1>
               <p className="text-xl text-purple-300/60 mb-8 flex items-center justify-center">
-                this cat's out of the bag and already rolling on a rug{' '}
-                <Image src="/cc-logo.svg" alt="Cat" width={22} height={22} className="inline-block ml-1" />
+                a sneak peek into my world {' '}
+                <Image src="/cc-logo.svg" alt="Cheshire Cat Logo" width={22} height={22} className="inline-block ml-1" />
               </p>
               <div className="mb-4 relative z-30">
                 <BetInput 
@@ -365,7 +314,7 @@ export default function Portfolio() {
                   duration: 6,
                   repeat: Infinity,
                 }}
-                className="absolute -bottom-6 -right-6 w-20 h-20 bg-purple-700/20 rounded-lg blur-2xl"
+                className="absolute -bottom-5 -right-6 w-20 h-20 bg-purple-700/20 rounded-lg blur-2xl"
               />
 <code className="text-sm text-purple-300 block relative z-9">
   <span className="text-purple-500">function</span> infiniteMoneyGlitch<span className="text-purple-400">()</span> &#123;
@@ -432,10 +381,10 @@ export default function Portfolio() {
               className="text-center mb-12"
             >
               <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent mb-4">
-                faster sen la
+                contact
               </h2>
               <p className="text-purple-300/60 max-w-xl mx-auto">
-              who even uses email dude but i mean this is more professional and convincing so i shall abide
+              who even uses email right but it looks professional so i shall abide
 
               </p>
             </motion.div>
@@ -448,7 +397,7 @@ export default function Portfolio() {
                     id="name"
                     name="name"
                     className="w-full px-3 py-2 bg-purple-900/20 border border-purple-700/50 rounded-md text-purple-100 placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="name (tbh idc but i think im obligated to include this)"
+                    placeholder="pretty self explanatory if u ask me"
                   />
                 </div>
                 <div>
@@ -458,7 +407,7 @@ export default function Portfolio() {
                     id="email"
                     name="email"
                     className="w-full px-3 py-2 bg-purple-900/20 border border-purple-700/50 rounded-md text-purple-100 placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="email (uk what just leave ur tele or disc name ill dm u)"
+                    placeholder="unfortunately this is obligatory but u can include ur tele/discord below"
                   />
                 </div>
                 <div>
@@ -468,7 +417,7 @@ export default function Portfolio() {
                     name="message"
                     rows={4}
                     className="w-full px-3 py-2 bg-purple-900/20 border border-purple-700/50 rounded-md text-purple-100 placeholder-purple-400/50 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="keep yapping mate"
+                    placeholder="blah blah blah"
                   ></textarea>
                 </div>
                 <div>
