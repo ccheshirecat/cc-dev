@@ -1,17 +1,25 @@
 'use client'
 
 import { motion, useScroll, useTransform } from "framer-motion"
-import { Cat, Star } from 'lucide-react'
+import { Cat, Star, Menu } from 'lucide-react'
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import Image from 'next/image'
 
 import { Card } from "@/components/ui/card"
 import { Projects } from "./projects"
 import { Skills } from "@/app/skills"
 import { WalletDropdown } from "@/components/wallet-dropdown"
 import { BetInput } from '@/components/bet-input'
-import Plinko from '@/components/plinko'
+import { SlotMachine } from '@/components/slot-machine'
+import { Notification } from '@/components/notification'
+import { AnimatePresence } from 'framer-motion'
+
+// Ensure these sound files exist in the public/sounds directory
+// - /public/sounds/spin.mp3
+// - /public/sounds/win.mp3
+// - /public/sounds/lose.mp3
 
 type CryptoBalance = {
   symbol: string;
@@ -28,17 +36,19 @@ export default function Portfolio() {
     name: 'Ethereum', 
     balance: '0.00' 
   })
-  const [betAmount, setBetAmount] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [betAmount, setBetAmount] = useState(1)
+  const [isSpinning, setIsSpinning] = useState(false)
   const [intricatePattern, setIntricatePattern] = useState<string>('')
+  const [notification, setNotification] = useState<{ message: string; isVisible: boolean; type: 'success' | 'error' }>({ message: '', isVisible: false, type: 'success' })
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     // Generate intricate pattern
     const generateIntricatePattern = () => {
       const svgWidth = window.innerWidth;
       const svgHeight = window.innerHeight;
-      const cellSize = 100; // Size of each cell in the grid
-      const lineOpacity = 0.09; // Slightly more visible, but still subtle lines
+      const cellSize = 50; // Reduced cell size for better visibility
+      const lineOpacity = 0.05; // Reduced opacity for subtlety
 
       let pattern = '';
 
@@ -67,11 +77,7 @@ export default function Portfolio() {
     const generateSquare = (x: number, y: number, size: number, opacity: number) => {
       return `
         <rect x="${x}" y="${y}" width="${size}" height="${size}" 
-              fill="none" stroke="#C4B5E0" stroke-width="0.3" opacity="${opacity}" />
-        <line x1="${x}" y1="${y}" x2="${x + size}" y2="${y + size}" 
-              stroke="#C4B5E0" stroke-width="0.3" opacity="${opacity}" />
-        <line x1="${x + size}" y1="${y}" x2="${x}" y2="${y + size}" 
-              stroke="#C4B5E0" stroke-width="0.3" opacity="${opacity}" />
+              fill="none" stroke="#C4B5E0" stroke-width="0.5" opacity="${opacity}" />
       `;
     };
 
@@ -80,11 +86,7 @@ export default function Portfolio() {
       const centerY = y + size / 2;
       return `
         <polygon points="${centerX},${y} ${x + size},${centerY} ${centerX},${y + size} ${x},${centerY}"
-                 fill="none" stroke="#C4B5E0" stroke-width="0.3" opacity="${opacity}" />
-        <line x1="${x}" y1="${centerY}" x2="${x + size}" y2="${centerY}" 
-              stroke="#C4B5E0" stroke-width="0.3" opacity="${opacity}" />
-        <line x1="${centerX}" y1="${y}" x2="${centerX}" y2="${y + size}" 
-              stroke="#C4B5E0" stroke-width="0.3" opacity="${opacity}" />
+                 fill="none" stroke="#C4B5E0" stroke-width="0.5" opacity="${opacity}" />
       `;
     };
 
@@ -100,24 +102,52 @@ export default function Portfolio() {
       }
       return `
         <polygon points="${hexPoints.join(' ')}"
-                 fill="none" stroke="#C4B5E0" stroke-width="0.3" opacity="${opacity}" />
-        <line x1="${hexPoints[0].split(',')[0]}" y1="${hexPoints[0].split(',')[1]}" 
-              x2="${hexPoints[3].split(',')[0]}" y2="${hexPoints[3].split(',')[1]}" 
-              stroke="#C4B5E0" stroke-width="0.3" opacity="${opacity}" />
-        <line x1="${hexPoints[1].split(',')[0]}" y1="${hexPoints[1].split(',')[1]}" 
-              x2="${hexPoints[4].split(',')[0]}" y2="${hexPoints[4].split(',')[1]}" 
-              stroke="#C4B5E0" stroke-width="0.3" opacity="${opacity}" />
-        <line x1="${hexPoints[2].split(',')[0]}" y1="${hexPoints[2].split(',')[1]}" 
-              x2="${hexPoints[5].split(',')[0]}" y2="${hexPoints[5].split(',')[1]}" 
-              stroke="#C4B5E0" stroke-width="0.3" opacity="${opacity}" />
+                 fill="none" stroke="#C4B5E0" stroke-width="0.5" opacity="${opacity}" />
       `;
     };
 
     setIntricatePattern(generateIntricatePattern());
+
+    const handleResize = () => {
+      setIntricatePattern(generateIntricatePattern());
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
-  const handlePlay = () => {
-    setIsPlaying(true)
+  const handlePlay = (amount: number) => {
+    if (parseFloat(selectedCrypto.balance) < amount) {
+      setNotification({
+        message: `Insufficient balance. You need $${amount} in ${selectedCrypto.symbol}`,
+        isVisible: true,
+        type: 'error'
+      });
+      return;
+    }
+    setIsSpinning(true);
+    setSelectedCrypto(prev => ({
+      ...prev,
+      balance: (parseFloat(prev.balance) - amount).toFixed(2)
+    }));
+    
+    setTimeout(() => setIsSpinning(false), 2500);
+  };
+
+  const handleWin = (multiplier: number) => {
+    const winAmount = betAmount * multiplier;
+    setSelectedCrypto(prev => ({
+      ...prev,
+      balance: (parseFloat(prev.balance) + winAmount).toFixed(2)
+    }))
+    setNotification({
+      message: `Congratulations! You won ${winAmount} ${selectedCrypto.symbol}`,
+      isVisible: true,
+      type: 'success'
+    });
   }
 
   return (
@@ -190,10 +220,21 @@ export default function Portfolio() {
           >
             cc
           </Link>
-          <div className="absolute left-1/2 transform -translate-x-1/2">
-            <WalletDropdown onSelectCrypto={setSelectedCrypto} />
+          <div className="md:hidden">
+            <WalletDropdown 
+              selectedCrypto={selectedCrypto} 
+              onSelectCrypto={setSelectedCrypto} 
+              onNotification={(message, type) => setNotification({ message, isVisible: true, type })}
+            />
           </div>
-          <div className="flex items-center gap-6">
+          <div className="absolute left-1/2 transform -translate-x-1/2 hidden md:block">
+            <WalletDropdown 
+              selectedCrypto={selectedCrypto} 
+              onSelectCrypto={setSelectedCrypto} 
+              onNotification={(message, type) => setNotification({ message, isVisible: true, type })}
+            />
+          </div>
+          <div className="hidden md:flex items-center gap-6">
             {['Projects', 'Skills', 'Contact'].map((item, index) => (
               <Link
                 key={item}
@@ -210,11 +251,47 @@ export default function Portfolio() {
               </Link>
             ))}
           </div>
+          <Button
+            className="md:hidden text-purple-300 hover:text-purple-100"
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
         </div>
       </motion.nav>
 
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-x-0 top-16 z-50 bg-black backdrop-blur-md border-b border-purple-500/20 md:hidden"
+          >
+            <div className="container mx-auto px-4 py-4">
+              <div className="flex flex-col gap-2">
+                {['Projects', 'Skills', 'Contact'].map((item, index) => (
+                  <Link
+                    key={item}
+                    href={`#${item.toLowerCase()}`}
+                    className="text-purple-300 hover:text-purple-100 transition-colors py-3 px-4 rounded-lg bg-purple-800/20 hover:bg-purple-700/30"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <span className="relative z-10">{item}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <main>
-        {/* Hero Section with Plinko Game */}
+        {/* Hero Section with Slot Machine */}
         <section className="relative pt-32 pb-20 overflow-hidden">
           <div className="container mx-auto px-4 max-w-5xl relative z-20">
             <motion.div
@@ -223,21 +300,15 @@ export default function Portfolio() {
               transition={{ duration: 0.5 }}
               className="max-w-3xl mx-auto text-center"
             >
-              <motion.div
-                animate={{
-                  rotate: [0, 10, -10, 10, 0],
-                  transition: { duration: 5, repeat: Infinity },
-                }}
-                className="inline-block"
-              >
-              <Cat
-                className={`w-24 h-24 mx-auto mb-8 transition-all duration-300 ${
-                  isHovered ? "text-pink-400 scale-110" : "text-purple-400"
-                }`}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-              />
-              </motion.div>
+              <div className="mb-12 relative z-30">
+                <SlotMachine 
+                  onWin={handleWin} 
+                  isSpinning={isSpinning} 
+                  spinSoundPath="/sounds/spin.mp3"
+                  winSoundPath="/sounds/win.mp3"
+                  loseSoundPath="/sounds/lose.mp3"
+                />
+              </div>
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 relative glow">
                 <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">
                   cheshirecat.dev
@@ -256,22 +327,21 @@ export default function Portfolio() {
                   <Star className="w-12 h-12" />
                 </motion.div>
               </h1>
-              <p className="text-xl text-purple-300/60 mb-8">
-              this cat’s out of the bag and already rolling on a rug 😼
+              <p className="text-xl text-purple-300/60 mb-8 flex items-center justify-center">
+                this cat's out of the bag and already rolling on a rug{' '}
+                <Image src="/cc-logo.svg" alt="Cat" width={22} height={22} className="inline-block ml-1" />
               </p>
               <div className="mb-4 relative z-30">
-                <BetInput selectedCrypto={selectedCrypto} onBetChange={setBetAmount} onPlay={handlePlay} />
+                <BetInput 
+                  selectedCrypto={selectedCrypto} 
+                  onBetChange={setBetAmount} 
+                  onPlay={handlePlay}
+                  isSpinning={isSpinning}
+                />
               </div>
             </motion.div>
           </div>
         </section>
-
-        {/* Plinko Game Canvas */}
-        <div className="fixed inset-0 z-0 flex justify-center items-center pointer-events-none">
-          <div className="w-full max-w-[800px]">
-            <Plinko betAmount={betAmount} onPlay={handlePlay} />
-          </div>
-        </div>
 
         {/* About Section */}
         <section className="py-20 relative">
@@ -430,6 +500,14 @@ export default function Portfolio() {
           </p>
         </div>
       </footer>
+      {/* Notification */}
+      <Notification
+        message={notification.message}
+        isVisible={notification.isVisible}
+        onClose={() => setNotification(prev => ({ ...prev, isVisible: false }))}
+        type={notification.type}
+        autoHideDuration={5000}
+      />
     </>
   )
 }
