@@ -150,7 +150,7 @@ export function BetInput({ selectedCrypto, onBetChange, onPlay, isSpinning, turb
           onClick={handleBet}
           disabled={isSpinning || autoSpin}
         >
-          {isSpinning ? 'spinning...' : autoSpin ? 'autospin on' : 'Bet'}
+          {isSpinning ? 'spinning...' : autoSpin ? 'autospin on' : 'bet'}
         </Button>
 
         <Button
