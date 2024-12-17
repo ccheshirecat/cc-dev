@@ -442,7 +442,7 @@ export default function Portfolio() {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-purple-900/20">
+      <footer className="py-12 border-t border-purple-900/20 relative z-10">
         <div className="container mx-auto px-4 max-w-5xl text-center">
           <p className="text-purple-400/60 text-sm">
             this beautiful creation was conjured up by me obviously © cheshirecat {new Date().getFullYear()}
