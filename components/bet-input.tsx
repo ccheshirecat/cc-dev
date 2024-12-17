@@ -60,6 +60,27 @@ export function BetInput({ selectedCrypto, onBetChange, onPlay, isSpinning, turb
     }
   }
 
+  const handleHalf = () => {
+    const currentBalance = parseFloat(selectedCrypto.balance);
+    const rate = exchangeRates[selectedCrypto.symbol] || 1;
+    const currentAmount = parseFloat(amount) || 0;
+    const halfAmount = displayFiat 
+      ? Math.min((currentAmount || currentBalance * rate) / 2, currentBalance * rate) 
+      : Math.min((currentAmount || currentBalance) / 2, currentBalance);
+    setAmount(halfAmount.toFixed(2));
+    onBetChange(displayFiat ? halfAmount / rate : halfAmount);
+  }
+
+  const handleDouble = () => {
+    const currentBalance = parseFloat(selectedCrypto.balance);
+    const rate = exchangeRates[selectedCrypto.symbol] || 1;
+    const currentAmount = parseFloat(amount) || 0;
+    const maxAmount = displayFiat ? currentBalance * rate : currentBalance;
+    const doubledAmount = Math.min(currentAmount * 2, maxAmount);
+    setAmount(doubledAmount.toFixed(2));
+    onBetChange(displayFiat ? doubledAmount / rate : doubledAmount);
+  }
+
   const handleBet = () => {
     const betAmount = parseFloat(amount);
     if (betAmount > 0) {
@@ -84,9 +105,9 @@ export function BetInput({ selectedCrypto, onBetChange, onPlay, isSpinning, turb
   return (
     <div className="w-full max-w-md mx-auto space-y-4 relative z-20">
       <div className="flex items-center justify-between text-sm">
-        <div className="text-purple-300">Bet Amount</div>
+        <div className="text-purple-300">bet amount</div>
         <div className="text-purple-400">
-          Balance: {displayFiat 
+          balance: {displayFiat 
             ? `$${(parseFloat(selectedCrypto.balance) * (exchangeRates[selectedCrypto.symbol] || 1)).toFixed(2)}` 
             : `${parseFloat(selectedCrypto.balance).toFixed(8)} ${selectedCrypto.symbol}`}
         </div>
@@ -102,9 +123,6 @@ export function BetInput({ selectedCrypto, onBetChange, onPlay, isSpinning, turb
                 width={20}
                 height={20}
               />
-              {displayFiat && (
-                <span className="text-white text-base sm:text-lg">$</span>
-              )}
             </div>
             <Input
               ref={inputRef}
@@ -114,9 +132,13 @@ export function BetInput({ selectedCrypto, onBetChange, onPlay, isSpinning, turb
               className={`w-full pl-14 pr-24 py-4 sm:py-6 bg-purple-900/30 text-white text-base sm:text-lg ${
                 isInvalid ? 'border-red-500' : 'border-purple-700/50'
               }`}
-              placeholder="Enter bet amount"
+              placeholder="say bye to ur $"
               inputMode="decimal"
             />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+              <Button variant="ghost" onClick={handleHalf} className="h-8 px-3 bg-purple-800/50 text-purple-200">½</Button>
+              <Button variant="ghost" onClick={handleDouble} className="h-8 px-3 bg-purple-800/50 text-purple-200">2x</Button>
+            </div>
           </div>
         </div>
       </div>
@@ -128,14 +150,12 @@ export function BetInput({ selectedCrypto, onBetChange, onPlay, isSpinning, turb
           onClick={handleBet}
           disabled={isSpinning || autoSpin}
         >
-          {isSpinning ? 'Spinning...' : autoSpin ? 'Auto Spin On' : 'Bet'}
+          {isSpinning ? 'spinning...' : autoSpin ? 'autospin on' : 'Bet'}
         </Button>
 
         <Button
           size="lg"
-          className={`w-16 h-16 flex items-center justify-center rounded-xl p-4 ${
-            autoSpin ? 'bg-purple-500/90 text-white opacity-50' : 'bg-purple-600/80 hover:bg-purple-500/90 text-white'
-          }`}
+          className="w-16 h-16 flex items-center justify-center rounded-xl p-4"
           onClick={onAutoSpinToggle}
         >
           {autoSpin ? <Pause className="h-6 w-6" /> : <PlayCircle className="h-6 w-6" />}
@@ -143,9 +163,7 @@ export function BetInput({ selectedCrypto, onBetChange, onPlay, isSpinning, turb
 
         <Button
           size="lg"
-          className={`w-16 h-16 flex items-center justify-center rounded-xl p-4 ${
-            turboMode ? 'bg-purple-500/90 text-white opacity-50' : 'bg-purple-600/80 hover:bg-purple-500/90 text-white'
-          }`}
+          className="w-16 h-16 flex items-center justify-center rounded-xl p-4"
           onClick={onTurboToggle}
         >
           <Zap className="h-6 w-6" />
