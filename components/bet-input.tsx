@@ -44,7 +44,7 @@ export function BetInput({ selectedCrypto, onBetChange, onPlay, isSpinning, turb
     const parts = sanitizedValue.split('.');
     let newValue = parts[0];
     if (parts.length > 1) {
-      newValue += '.' + parts[1].slice(0, 2);
+      newValue += '.' + parts[1].slice(0, 8); // 8 decimal places for crypto
     }
     
     setAmount(newValue);
@@ -93,7 +93,7 @@ export function BetInput({ selectedCrypto, onBetChange, onPlay, isSpinning, turb
       const cryptoAmount = displayFiat ? betAmount / rate : betAmount;
       if (cryptoAmount > getMaxBet()) {
         setIsInvalid(true);
-        onNotification(`Maximum bet is ${displayFiat ? `$${MAX_BET_USD.toFixed(2)}` : `${getMaxBet().toFixed(8)} ${selectedCrypto.symbol}`}`, 'error');
+        onNotification(`maximum bet is ${displayFiat ? `$${MAX_BET_USD.toFixed(2)}` : `${getMaxBet().toFixed(8)} ${selectedCrypto.symbol}`}`, 'error');
       } else {
         setIsInvalid(false); 
         onPlay(cryptoAmount);
@@ -112,41 +112,24 @@ export function BetInput({ selectedCrypto, onBetChange, onPlay, isSpinning, turb
       <div className="flex items-center justify-between text-sm">
         <div className="text-purple-300">bet amount</div>
         <div className="text-purple-400">
-          Balance: {displayFiat 
+          balance: {displayFiat 
             ? `$${(parseFloat(selectedCrypto.balance) * (exchangeRates[selectedCrypto.symbol] || 1)).toFixed(2)}` 
             : `${parseFloat(selectedCrypto.balance).toFixed(8)} ${selectedCrypto.symbol}`}
         </div>
       </div>
       
       <div className="relative">
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-              <Image
-                src={getCryptoIcon(selectedCrypto.symbol)}
-                alt={selectedCrypto.symbol}
-                width={20}
-                height={20}
-              />
-              {displayFiat && <span className="text-white text-base sm:text-lg">$</span>}
-            </div>
-            <Input
-              ref={inputRef}
-              type="text"
-              value={amount}
-              onChange={(e) => handleAmountChange(e.target.value)}
-              className={`w-full pl-14 pr-24 py-4 sm:py-6 bg-purple-900/30 text-white text-base sm:text-lg ${
-                isInvalid ? 'border-red-500' : 'border-purple-700/50'
-              }`}
-              placeholder="say bye to $"
-              inputMode="decimal"
-            />
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-              <Button onClick={handleHalf} className="h-8 px-3 bg-purple-800/50">½</Button>
-              <Button onClick={handleDouble} className="h-8 px-3 bg-purple-800/50">2x</Button>
-            </div>
-          </div>
-        </div>
+        <Input
+          ref={inputRef}
+          type="text"
+          value={amount}
+          onChange={(e) => handleAmountChange(e.target.value)}
+          className={`w-full pl-14 pr-24 py-4 sm:py-6 bg-purple-900/30 text-white text-base sm:text-lg ${
+            isInvalid ? 'border-red-500' : 'border-purple-700/50'
+          }`}
+          placeholder="say bye to $"
+          inputMode="decimal"
+        />
       </div>
 
       <div className="flex gap-2 items-center">
@@ -156,24 +139,34 @@ export function BetInput({ selectedCrypto, onBetChange, onPlay, isSpinning, turb
           onClick={handleBet}
           disabled={isSpinning || autoSpin}
         >
-          {isSpinning ? 'spinning...' : autoSpin ? 'autospin on' : 'Bet'}
+          {isSpinning ? 'spinning...' : autoSpin ? 'autospin on' : 'bet'}
         </Button>
-
         <Button
-          size="lg"
-          className="w-16 h-16 flex items-center justify-center rounded-xl p-4"
-          onClick={onAutoSpinToggle}
-        >
-          {autoSpin ? <Pause className="h-6 w-6" /> : <PlayCircle className="h-6 w-6" />}
-        </Button>
+  size="lg"
+  className={`w-16 h-16 flex items-center justify-center rounded-xl p-4 transition-all duration-300
+    ${autoSpin
+      ? 'bg-purple-900/50 text-purple-300 opacity-50 cursor-pointer'
+      : 'bg-purple-600/80 hover:bg-purple-500/90 text-white'
+    }`}
+  onClick={onAutoSpinToggle}
+>
+  {autoSpin ? <Pause className="h-6 w-6" /> : <PlayCircle className="h-6 w-6" />}
+</Button>
 
-        <Button
-          size="lg"
-          className="w-16 h-16 flex items-center justify-center rounded-xl p-4"
-          onClick={onTurboToggle}
-        >
-          <Zap className="h-6 w-6" />
-        </Button>
+<Button
+  size="lg"
+  className={`w-16 h-16 flex items-center justify-center rounded-xl p-4 transition-all duration-300
+    ${turboMode
+      ? 'bg-purple-900/50 text-purple-300 opacity-50 cursor-pointer'
+      : 'bg-purple-600/80 hover:bg-purple-500/90 text-white'
+    }`}
+  onClick={onTurboToggle}
+>
+  <Zap className="h-6 w-6" />
+</Button>
+
+
+
       </div>
     </div>
   )
