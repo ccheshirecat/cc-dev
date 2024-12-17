@@ -215,7 +215,7 @@ function PortfolioContent() {
               />
             </div>
             <div className="hidden md:flex items-center gap-6">
-              {['Projects', 'Skills', 'Contact'].map((item, index) => (
+              {['projects', 'skills', 'contact'].map((item, index) => (
                 <Link
                   key={item}
                   href={`#${item.toLowerCase()}`}

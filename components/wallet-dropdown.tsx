@@ -109,7 +109,7 @@ export function WalletDropdown({ onNotification, isMobile }: WalletDropdownProps
         {!isMobile && (
           <Button className="bg-purple-900/80 hover:bg-purple-800/90 text-purple-100 backdrop-blur-sm">
             <WalletIcon className="w-5 h-5 mr-2" />
-            Wallet
+            wallet
           </Button>
         )}
       </div>
