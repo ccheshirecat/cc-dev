@@ -9,35 +9,36 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 
 export default function Projects() {
- const projects = [
-   {
-     title: "FUSED.GG",
-     description: 'Currently still a work in progress, fused.gg is a new player in the iGaming space focused on helping make affiliates more competitive, expand their reach and grow their brand as a service. By extension also to improve overall transparency in the sector to help players make better decisions.',
-     image: '/fused-thumbnail.png?height=200&width=300',
-     tags: ["Next.js", "React", "TypeScript", "Tailwind CSS", "GraphQL", "PostgreSQL", "Redis"],
-     links: {
-       live: "https://fused.gg",
-     },
-   },
-   {
-     title: "Porter Plays",
-     description: 'A casino affiliate site with fully integrated leaderboards that support multiple casinos, user management system with a rewards system that comes with a points store, and a custom and original design and brand identity.',
-     image: '/porterplays-thumbnail.png?height=200&width=300',
-     tags: ["Next.js", "React", "TypeScript", "Drizzle ORM", "PostgreSQL", "Tailwind CSS"],
-     links: {
-       live: "https://porterplays.vercel.app",
-     },
-   },
-   {
-    title: "Portfolio for an Emcee",
-    description: "Slightly different project for an IRL client, built in Astro to be blazingly fast, mixing my usual unprofessional style with the need for a professional theme, think it turnede out decent.",
-    image: '/perrybrady-thumbnail.png?height=200&width=300',
-     tags: ["Astro", "React", "Tailwind CSS", "Framer Motion"],
-     links: {
-      live: 'https://perry-brady.vercel.app',
+  const projects = [
+    {
+      title: "FUSED.GG",
+      description: 'Currently still a work in progress, fused.gg is a new player in the iGaming space focused on helping make affiliates more competitive, expand their reach and grow their brand as a service. By extension also to improve overall transparency in the sector to help players make better decisions.',
+      image: 'https://cheshirecat.dev/cdn-cgi/image/width=300,height=200,format=webp,quality=85/fused-thumbnail.png',
+      tags: ["Next.js", "React", "TypeScript", "Tailwind CSS", "GraphQL", "PostgreSQL", "Redis"],
+      links: {
+        live: "https://fused.gg",
+      },
     },
-  }
- ]
+    {
+      title: "Porter Plays",
+      description: 'A casino affiliate site with fully integrated leaderboards that support multiple casinos, user management system with a rewards system that comes with a points store, and a custom and original design and brand identity.',
+      image: 'https://cheshirecat.dev/cdn-cgi/image/width=300,height=200,format=webp,quality=85/porterplays-thumbnail.png',
+      tags: ["Next.js", "React", "TypeScript", "Drizzle ORM", "PostgreSQL", "Tailwind CSS"],
+      links: {
+        live: "https://porterplays.vercel.app",
+      },
+    },
+    {
+      title: "Portfolio for an Emcee",
+      description: "Slightly different project for an IRL client, built in Astro to be blazingly fast, mixing my usual unprofessional style with the need for a professional theme, think it turnede out decent.",
+      image: 'https://cheshirecat.dev/cdn-cgi/image/width=300,height=200,format=webp,quality=85/perrybrady-thumbnail.png',
+      tags: ["Astro", "React", "Tailwind CSS", "Framer Motion"],
+      links: {
+        live: 'https://perry-brady.vercel.app',
+      },
+    }
+  ]
+  
 
  return (
    <section id="projects" className="py-20 relative z-10">
@@ -67,12 +68,12 @@ export default function Projects() {
            >
              <Card className="overflow-hidden bg-black border border-purple-800/30 group rounded-3xl shadow-lg shadow-purple-900/10 hover:shadow-purple-800/20 hover:border-purple-700/50 transition-all duration-300">
                <div className="relative aspect-video overflow-hidden bg-black">
-                 <Image
-                   src={project.image}
-                   alt={project.title}
-                   fill
-                   className="object-cover transition-transform duration-300 group-hover:scale-110"
-                 />
+               <Image
+  src={project.image}
+  alt={project.title}
+  fill
+  className="object-cover transition-transform duration-300 group-hover:scale-110"
+/>
                </div>
                <div className="p-6">
                  <h3 className="text-xl font-semibold mb-2 bg-gradient-to-r from-purple-300 to-white bg-clip-text text-transparent">{project.title}</h3>

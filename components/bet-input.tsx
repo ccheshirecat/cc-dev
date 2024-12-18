@@ -139,13 +139,13 @@ export function BetInput({
         <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 z-10">
           {selectedCrypto.symbol && (
             <Image
-              src={getCryptoIcon(selectedCrypto.symbol)} 
-              alt={selectedCrypto.symbol}
-              width={20}
-              height={20}
-              unoptimized
-              className="z-20"
-            />
+  src={`https://cheshirecat.dev/cdn-cgi/image/width=20,height=20,format=webp,quality=85/${getCryptoIcon(selectedCrypto.symbol)}`}
+  alt={selectedCrypto.symbol}
+  width={20}
+  height={20}
+  className="z-20"
+/>
+
           )}
           {displayFiat && <span className="text-white text-base sm:text-lg">$</span>}
         </div>

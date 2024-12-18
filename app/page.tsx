@@ -65,7 +65,7 @@ const PortfolioContent = memo(function PortfolioContent() {
       });
     }
   }, [tipAdded, addRandomTip, displayFiat]);
-  
+
   useEffect(() => {
     let autoSpinInterval: NodeJS.Timeout;
     if (autoSpin && !isSpinning) {
@@ -286,14 +286,15 @@ const toggleAutoSpin = useCallback(() => {
               </h1>
               <p className="text-base sm:text-lg md:text-xl text-purple-300/60 mb-6 sm:mb-8 flex items-center justify-center">
                 a sneak peek into my world {' '}
-                <Image 
-                  src="/cc-logo.svg" 
-                  alt="Cheshire Cat Logo" 
-                  width={22} 
-                  height={22} 
-                  className="inline-block ml-1" 
-                  priority
-                />
+ <Image 
+  src="https://cheshirecat.dev/cdn-cgi/image/width=22,height=22,format=webp,quality=85/cc-logo.png" 
+  alt="Cheshire Cat Logo" 
+  width={22} 
+  height={22} 
+  className="inline-block ml-1" 
+  priority
+/>
+
               </p>
               <div className="relative z-30 max-w-md mx-auto">
                 {MemoizedBetInput}

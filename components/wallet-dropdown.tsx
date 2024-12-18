@@ -91,13 +91,14 @@ export function WalletDropdown({ onNotification, isMobile }: WalletDropdownProps
           onClick={() => setIsOpen(!isOpen)}
         >
           <div className="flex items-center">
-            <Image
-              src={getCryptoIcon(selectedCrypto.symbol)}
-              alt={selectedCrypto.symbol}
-              width={16}
-              height={16}
-              className="mr-2"
-            />
+          <Image
+  src={`https://cheshirecat.dev/cdn-cgi/image/width=16,height=16,format=webp,quality=85/${getCryptoIcon(selectedCrypto.symbol)}`}
+  alt={selectedCrypto.symbol}
+  width={16}
+  height={16}
+  className="mr-2"
+/>
+
             <span className="font-mono">
               {formatBalance(selectedCrypto.balance, selectedCrypto.symbol)}
             </span>
@@ -153,13 +154,15 @@ export function WalletDropdown({ onNotification, isMobile }: WalletDropdownProps
                     onClick={() => handleCryptoSelect(crypto)}
                   >
                     <div className="flex items-center gap-2">
-                      <Image
-                        src={getCryptoIcon(crypto.symbol)}
-                        alt={crypto.name}
-                        width={16}
-                        height={16}
-                        className="rounded-full"
-                      />
+
+
+                    <Image
+  src={`https://cheshirecat.dev/cdn-cgi/image/width=16,height=16,format=webp,quality=85/${getCryptoIcon(crypto.symbol)}`}
+  alt={crypto.name}
+  width={16}
+  height={16}
+  className="rounded-full"
+/>
                       <span className="text-purple-200 text-xs">{crypto.symbol}</span>
                     </div>
                     <span className="text-purple-300 text-xs font-mono">

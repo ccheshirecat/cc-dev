@@ -7,14 +7,14 @@ import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// List of background images to randomly pick from
+// List of background images to randomly pick from (Cloudflare-optimized URLs)
 const bgimgs = [
-  '/cdn-cgi/image/width=1920,height=1080,format=webp,quality=85/bg1.png',
-  '/cdn-cgi/image/width=1920,height=1080,format=webp,quality=85/bg2.png',
-  '/cdn-cgi/image/width=1920,height=1080,format=webp,quality=85/bg3.png',
+  'https://cheshirecat.dev/cdn-cgi/image/width=1920,height=1080,format=webp,quality=85/bg1.png',
+  'https://cheshirecat.dev/cdn-cgi/image/width=1920,height=1080,format=webp,quality=85/bg2.png',
+  'https://cheshirecat.dev/cdn-cgi/image/width=1920,height=1080,format=webp,quality=85/bg3.png',
 ];
 
-// Randomly pick an image (this is done on the server)
+// Randomly pick one image (this is done on the server, not client)
 const randomImage = bgimgs[Math.floor(Math.random() * bgimgs.length)];
 
 export const metadata: Metadata = {
@@ -29,9 +29,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         className={`${inter.className} min-h-screen bg-black text-purple-300`}
         style={{
           backgroundImage: `url('${randomImage}')`, 
-          backgroundSize: 'cover', 
-          backgroundRepeat: 'no-repeat', 
-          backgroundPosition: 'center', 
+          backgroundSize: 'auto', // <-- No stretch, maintain proportions
+          backgroundRepeat: 'repeat', // <-- Repeat if bigger
+          backgroundPosition: 'top left', // <-- Start from top-left
         }}
       >
         <RecoilProvider>

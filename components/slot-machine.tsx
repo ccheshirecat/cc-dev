@@ -315,22 +315,23 @@ export function SlotMachine({ onWin, isSpinning, spinSoundPath, winSoundPath, lo
               transition={spinning[index] ? { repeat: Infinity, duration: turboMode ? 0.1 : 0.2 } : {}}
             >
               <AnimatePresence mode="wait">
-                <motion.div
-                  key={spinning[index] ? spinningSymbols[index] : reel}
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -50, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className={spinning[index] ? "blur-sm" : ""}
-                >
-                  <Image
-                    src={symbols[spinning[index] ? spinningSymbols[index] : reel]}
-                    alt={`Slot symbol ${spinning[index] ? spinningSymbols[index] : reel}`}
-                    width={96}
-                    height={96}
-                    className="w-full h-full object-contain"
-                  />
-                </motion.div>
+              <motion.div
+  key={spinning[index] ? spinningSymbols[index] : reel}
+  initial={{ y: 50, opacity: 0 }}
+  animate={{ y: 0, opacity: 1 }}
+  exit={{ y: -50, opacity: 0 }}
+  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+  className={spinning[index] ? "blur-sm" : ""}
+>
+  <Image
+    src={`https://cheshirecat.dev/cdn-cgi/image/width=96,height=96,format=webp,quality=85/${symbols[spinning[index] ? spinningSymbols[index] : reel]}`}
+    alt={`Slot symbol ${spinning[index] ? spinningSymbols[index] : reel}`}
+    width={96}
+    height={96}
+    className="w-full h-full object-contain"
+  />
+</motion.div>
+
               </AnimatePresence>
               {winningCombination.includes(index) && (
                 <motion.div
