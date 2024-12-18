@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 
 const symbols = [
-  '/cat.svg',
-  '/dog.svg',
-  '/fox.svg',
-  '/rabbit.svg',
-  '/tiger.svg',
-  '/bonus.svg'
+  '/cat.png',
+  '/dog.png',
+  '/fox.png',
+  '/rabbit.png',
+  '/tiger.png',
+  '/bonus.png'
 ]
 
 interface SlotMachineProps {
