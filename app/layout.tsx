@@ -8,7 +8,7 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 // Cloudflare-optimized image path
-const bgImage = 'https://cheshirecat.dev/cdn-cgi/image/width=128,height=128,format=webp,quality=85/bg.png';
+const bgImage = 'https://cheshirecat.dev/cdn-cgi/image/format=webp,quality=85/bg.png';
 
 export const metadata: Metadata = {
   title: 'cc || cheshirecat.dev',
@@ -21,10 +21,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         className={`${inter.className} min-h-screen bg-black text-purple-300 relative`}
         style={{
-          backgroundImage: `url('${bgImage}')`, // Optimized URL via Cloudflare
-          backgroundSize: '128px 128px', // Tile size for seamless repeat
-          backgroundRepeat: 'repeat', // Infinite repeat for seamless effect
-          backgroundPosition: 'top left', // Align starting point
+          backgroundImage: `url('${bgImage}')`, // Cloudflare-optimized image
+          backgroundSize: 'auto', // Keep original size
+          backgroundRepeat: 'repeat', // Tile seamlessly
+          backgroundPosition: 'top left', // Start from top-left
         }}
       >
         <RecoilProvider>
