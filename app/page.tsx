@@ -21,12 +21,12 @@ import { isMobile } from '@/utils/isMobile'
 
 const Projects = dynamic(() => import('./projects'), { 
   ssr: false, 
-  loading: () => <p>Loading projects...</p>,
+  loading: () => <p>loading projects...</p>,
   suspense: true 
 })
 const Skills = dynamic(() => import('@/app/skills').then(mod => mod.default), {
   ssr: false,
-  loading: () => <p>Loading skills...</p>,
+  loading: () => <p>loading skills...</p>,
   suspense: true
 })
 
@@ -51,7 +51,6 @@ const PortfolioContent = memo(function PortfolioContent() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-
   useEffect(() => {
     if (!tipAdded) {
       addRandomTip().then((tip) => {
@@ -66,18 +65,7 @@ const PortfolioContent = memo(function PortfolioContent() {
       });
     }
   }, [tipAdded, addRandomTip, displayFiat]);
-
-  // useEffect(() => {
-  //   const newBalance = balances.find(b => b.symbol !== 'BTC' && b.symbol !== 'ETH' && parseFloat(b.balance) > 0);
-  //   if (newBalance) {
-  //     setNotification({
-  //       message: `@cheshirecat tipped you ${displayFiat ? `$${convertCryptoToFiat(parseFloat(newBalance.balance), newBalance.symbol)}` : `${newBalance.balance} ${newBalance.symbol}`}`,
-  //       isVisible: true,
-  //       type: 'success'
-  //     });
-  //   }
-  // }, [balances, displayFiat, convertCryptoToFiat]);
-
+  
   useEffect(() => {
     let autoSpinInterval: NodeJS.Timeout;
     if (autoSpin && !isSpinning) {
@@ -135,66 +123,18 @@ const PortfolioContent = memo(function PortfolioContent() {
     });
   }, [betAmount, selectedCrypto, updateBalance, setNotification, displayFiat, convertFiatToCrypto]);
 
-  const elementCount = isMobileDevice ? 2 : 3;
-  const orbCount = isMobileDevice ? 1 : 2;
-
-  const BackgroundElements = useMemo(() => (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-black to-purple-950" />
-      <div className="absolute inset-0 opacity-20">
-        {[...Array(elementCount)].map((_, index) => (
-          <div
-            key={index}
-            className="absolute w-10 h-10 hw-accelerate animate-float"
-            style={{
-              animationDelay: `${Math.random() * 20}s`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-            }}
-          >
-            <Image
-              src={index % 2 === 0 ? "/cat.svg" : "/dog.svg"}
-              alt="Slot Symbol"
-              width={40}
-              height={40}
-              loading="lazy"
-            />
-          </div>
-        ))}
-      </div>
-      {[...Array(orbCount)].map((_, index) => (
-        <div
-          key={index}
-          className="absolute rounded-full bg-purple-400 opacity-10 blur-xl hw-accelerate animate-float animate-pulse"
-          style={{
-            width: `${Math.random() * 200 + 100}px`,
-            height: `${Math.random() * 200 + 100}px`,
-            animationDuration: `${isMobileDevice ? '45s' : '30s'}, 3s`,
-            animationDelay: `${Math.random() * 30}s, 0s`,
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-          }}
-        />
-      ))}
-      <div 
-        className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: `linear-gradient(to right, #8b5cf6 1px, transparent 1px), linear-gradient(to bottom, #8b5cf6 1px, transparent 1px)`,
-          backgroundSize: isMobileDevice ? '60px 60px' : '40px 40px',
-        }}
-      />
-    </div>
-  ), [isMobileDevice, elementCount, orbCount]);
-
-  const toggleAutoSpin = useCallback(() => {
-    setAutoSpin(prev => {
-      if (!prev && !isSpinning) {
-        handlePlay(betAmount);
-      }
-      return !prev;
-    });
-  }, [isSpinning, handlePlay, betAmount]);
-
+  
+const toggleAutoSpin = useCallback(() => {
+  setAutoSpin((prevAutoSpin) => {
+    const newAutoSpinState = !prevAutoSpin;
+    // Only play if autoSpin is turned on and the slot is not spinning
+    if (newAutoSpinState && !isSpinning) {
+      handlePlay(betAmount);
+    }
+    return newAutoSpinState;
+  });
+}, [isSpinning, handlePlay, betAmount]);
+  
   const MemoizedSlotMachine = useMemo(() => (
     <SlotMachine 
       onWin={handleWin} 
@@ -230,7 +170,6 @@ const PortfolioContent = memo(function PortfolioContent() {
 
   return (
     <>
-      {BackgroundElements}
 
       {/* Navigation */}
       <motion.nav
