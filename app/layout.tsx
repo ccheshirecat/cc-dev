@@ -4,13 +4,10 @@ import { WalletProvider } from '@/contexts/WalletContext';
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Background from '@/components/Background'; // Client-side Background component
 
 const inter = Inter({ subsets: ['latin'] });
 
-// Cloudflare-optimized image path
-const bgImage = 'https://cheshirecat.dev/cdn-cgi/image/format=webp,quality=85/bg.png';
-
-// Static metadata for the layout (this only works in server components)
 export const metadata: Metadata = {
   title: 'cc || cheshirecat.dev',
   description: 'i doubt anyone even reads this lol',
@@ -19,15 +16,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.className} min-h-screen bg-black text-purple-300 relative`}
-        style={{
-          backgroundImage: `url('${bgImage}')`, // Cloudflare-optimized image
-          backgroundSize: 'auto', // Keep original size
-          backgroundRepeat: 'repeat', // Tile seamlessly
-          backgroundPosition: 'top left', // Start from top-left
-        }}
-      >
+      <body className={`${inter.className} min-h-screen bg-black text-purple-300 relative`}>
+        {/* Background is lazy-loaded on the client-side for performance */}
+        <Background />
+        
         <RecoilProvider>
           <WalletProvider>{children}</WalletProvider>
         </RecoilProvider>
