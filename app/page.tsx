@@ -263,7 +263,7 @@ const toggleAutoSpin = useCallback(() => {
               <div className="mb-8 sm:mb-12 relative z-30 mx-auto max-w-full sm:max-w-[90%] md:max-w-[80%] lg:max-w-[70%] xl:max-w-[60%]">
                 {MemoizedSlotMachine}
               </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 relative glow">
+              <h1 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-4 sm:mb-6 relative glow">
                 <span className="text-purple-300/90">
                   cheshirecat.dev
                 </span>

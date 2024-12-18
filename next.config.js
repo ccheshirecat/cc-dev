@@ -13,4 +13,8 @@ module.exports = withBundleAnalyzer({
       },
     ],
   },
+  env: {
+    NEXT_PUBLIC_SITE_TITLE: 'cc || cheshirecat.dev',
+    NEXT_PUBLIC_SITE_DESCRIPTION: 'sup',
+  },
 });
