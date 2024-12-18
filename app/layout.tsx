@@ -18,14 +18,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen bg-black text-purple-300 relative`}>
-        <div className="absolute inset-0 w-full h-full">
+        <div className="absolute inset-0">
           <Image
             src={bgImage}
             alt="Background"
-            fill
-            style={{ objectFit: 'cover' }}
-            loading="lazy"  // Add lazy loading
-            priority={false} // Set priority to false for background images
+            layout="fill"
+            style={{ objectFit: 'none', objectPosition: 'center' }} // Center the image
+            loading="lazy"
+            priority={false}
           />
         </div>
 
