@@ -324,7 +324,7 @@ export function SlotMachine({ onWin, isSpinning, spinSoundPath, winSoundPath, lo
   className={spinning[index] ? "blur-sm" : ""}
 >
   <Image
-    src={`https://cheshirecat.dev/cdn-cgi/image/width=96,height=96,format=webp,quality=85/${symbols[spinning[index] ? spinningSymbols[index] : reel]}`}
+    src={`https://cheshirecat.dev/cdn-cgi/image/width=150,height=150,format=webp,quality=85/${symbols[spinning[index] ? spinningSymbols[index] : reel]}`}
     alt={`Slot symbol ${spinning[index] ? spinningSymbols[index] : reel}`}
     width={150}
     height={150}
