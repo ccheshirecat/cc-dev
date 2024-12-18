@@ -267,7 +267,7 @@ const toggleAutoSpin = useCallback(() => {
                 {MemoizedSlotMachine}
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 relative glow">
-                <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">
+                <span className="text-purple-300/90">
                   cheshirecat.dev
                 </span>
                 <motion.div
