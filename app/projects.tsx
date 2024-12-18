@@ -7,7 +7,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 
-export function Projects() {
+export default function Projects() {
  const projects = [
    {
      title: "FUSED.GG",

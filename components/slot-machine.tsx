@@ -26,9 +26,11 @@ interface SlotMachineProps {
   }
   turboMode: boolean
   setAutoSpin: (value: boolean) => void;
+  convertFiatToCrypto: (amount: number, symbol: string) => string; // Changed from number to string
+  displayFiat: boolean; // Added prop
 }
 
-export function SlotMachine({ onWin, isSpinning, spinSoundPath, winSoundPath, loseSoundPath, updateBalance, selectedCrypto, turboMode, setAutoSpin }: SlotMachineProps) {
+export function SlotMachine({ onWin, isSpinning, spinSoundPath, winSoundPath, loseSoundPath, updateBalance, selectedCrypto, turboMode, setAutoSpin, convertFiatToCrypto, displayFiat }: SlotMachineProps) {
   const [reels, setReels] = useState([0, 0, 0])
   const [spinning, setSpinning] = useState([false, false, false])
   const [spinningSymbols, setSpinningSymbols] = useState([0, 0, 0])
@@ -106,12 +108,12 @@ export function SlotMachine({ onWin, isSpinning, spinSoundPath, winSoundPath, lo
 
       const winResult = checkWin(newReels)
       if (winResult.isWin) {
-        const newMultiplier = getMultiplier(newReels, winResult.combination)
-        setMultiplier(newMultiplier)
+        const multiplier = getMultiplier(newReels, winResult.combination)
+        setMultiplier(multiplier)
         if (isBonus) {
-          setBonusWinTotal(prev => prev + newMultiplier)
+          setBonusWinTotal(prev => prev + multiplier)
         } else {
-          onWin(newMultiplier)
+          onWin(multiplier)
         }
         setResult('win')
         setWinningCombination(winResult.combination)
@@ -149,11 +151,16 @@ export function SlotMachine({ onWin, isSpinning, spinSoundPath, winSoundPath, lo
 
       if (isBonus) {
         setBonusSpinsLeft(prev => prev - 1)
+        if (winResult.isWin) {
+          setBonusWinTotal(prev => prev + multiplier)
+        }
         if (bonusSpinsLeft === 1 && !retrigger) {
           setBonusMode(false)
-          // Update the balance with the total bonus win
+          // Update the balance with the total bonus win at the end of free spins
           const currentBalance = parseFloat(selectedCrypto.balance);
-          const bonusWinAmount = bonusWinTotal * parseFloat(selectedCrypto.balance); // Convert multiplier to actual amount
+          const bonusWinAmount = displayFiat
+            ? parseFloat(convertFiatToCrypto(bonusWinTotal, selectedCrypto.symbol))
+            : bonusWinTotal;
           const newBalance = (currentBalance + bonusWinAmount).toFixed(8);
           updateBalance(selectedCrypto.symbol, newBalance);
           onWin(bonusWinTotal)
@@ -233,7 +240,7 @@ export function SlotMachine({ onWin, isSpinning, spinSoundPath, winSoundPath, lo
       return 100 // Jackpot for all cats
     }
     if (reels[0] === reels[1] && reels[1] === reels[2]) {
-      return reels[0] === 5 ? 50 : 20 // All symbols match (50x for bonus, 20x for others)
+      return reels[0] === 5 ? 50 : 20 // 50x for bonus, 20x for others
     }
     if (combination.length === 2) {
       return reels[combination[0]] === 0 ? 5 : 3 // Two adjacent symbols match

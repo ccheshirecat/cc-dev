@@ -1,11 +1,12 @@
 'use client'
 
+import React from 'react'
 import { motion } from "framer-motion"
 import { Cat, Code, Database, FileCode, Layers, Cpu, Zap } from 'lucide-react'
 
 import { Card } from "@/components/ui/card"
 
-export function Skills() {
+const Skills: React.FC = () => {
  const skills = [
    {
      category: "frontend",
@@ -77,7 +78,6 @@ export function Skills() {
          </h2>
          <p className="text-purple-300/60 max-w-xl mx-auto">
          tbh not sure whats the purpose of this but lotta people have it then i fomo
-
          </p>
        </motion.div>
        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -111,4 +111,6 @@ export function Skills() {
    </section>
  )
 }
+
+export default Skills
 

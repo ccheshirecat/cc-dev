@@ -1,52 +1,82 @@
 'use client'
 
 import { motion, useScroll, useTransform } from "framer-motion"
-import { Cat, Star, Menu, WalletIcon, Zap, PlayCircle, Pause } from 'lucide-react'
+import { Star, Menu } from 'lucide-react'
 import Link from "next/link"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback, memo, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
+import { usePathname } from 'next/navigation'
 
 import { Card } from "@/components/ui/card"
-import { Projects } from "./projects"
-import { Skills } from "@/app/skills"
 import { WalletDropdown } from "@/components/wallet-dropdown"
 import { BetInput } from '@/components/bet-input'
 import { SlotMachine } from '@/components/slot-machine'
 import { Notification } from '@/components/notification'
 import { AnimatePresence } from 'framer-motion'
 import { WalletProvider, useWallet } from '@/contexts/WalletContext'
-import { exchangeRates } from '@/utils/exchangeRates';
+import { exchangeRates } from '@/utils/exchangeRates'
+import { isMobile } from '@/utils/isMobile'
 
-function PortfolioContent() {
-  const [isHovered, setIsHovered] = useState(false)
+const Projects = dynamic(() => import('./projects'), { 
+  ssr: false, 
+  loading: () => <p>Loading projects...</p>,
+  suspense: true 
+})
+const Skills = dynamic(() => import('@/app/skills').then(mod => mod.default), {
+  ssr: false,
+  loading: () => <p>Loading skills...</p>,
+  suspense: true
+})
+
+const PortfolioContent = memo(function PortfolioContent() {
   const { scrollYProgress } = useScroll()
   const navBackgroundOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1])
-  const { selectedCrypto, updateBalance, addRandomTip, displayFiat } = useWallet()
+  const { selectedCrypto, updateBalance, addRandomTip, displayFiat, convertFiatToCrypto, convertCryptoToFiat, balances } = useWallet()
   const [betAmount, setBetAmount] = useState(0)
   const [isSpinning, setIsSpinning] = useState(false)
-  const [intricatePattern, setIntricatePattern] = useState<string>('')
   const [notification, setNotification] = useState<{ message: string; isVisible: boolean; type: 'success' | 'error' }>({ message: '', isVisible: false, type: 'success' })
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [turboMode, setTurboMode] = useState(false);
-  const [autoSpin, setAutoSpin] = useState(false);
-
-  console.log('Rendering page, turboMode:', turboMode);
+  const [turboMode, setTurboMode] = useState(false)
+  const [autoSpin, setAutoSpin] = useState(false)
+  const [isMobileDevice, setIsMobileDevice] = useState(false)
+  const [tipAdded, setTipAdded] = useState(false);
+  const pathname = usePathname()
 
   useEffect(() => {
-    const initializeRandomTip = async () => {
-      const tip = await addRandomTip();
-      if (tip) {
-        setNotification({
-          message: `@cheshirecat tipped you ${displayFiat ? `$${tip.fiatAmount}` : `${tip.cryptoAmount} ${tip.symbol}`}`,
-          isVisible: true,
-          type: 'success'
-        });
-      }
-    };
+    setIsMobileDevice(isMobile());
+    const handleResize = () => setIsMobileDevice(isMobile());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-    initializeRandomTip();
-  }, [addRandomTip, displayFiat]);
+
+  useEffect(() => {
+    if (!tipAdded) {
+      addRandomTip().then((tip) => {
+        if (tip) {
+          setNotification({
+            message: `@cheshirecat tipped you ${displayFiat ? `$${tip.fiatAmount}` : `${tip.cryptoAmount} ${tip.symbol}`}`,
+            isVisible: true,
+            type: 'success'
+          });
+          setTipAdded(true);
+        }
+      });
+    }
+  }, [tipAdded, addRandomTip, displayFiat]);
+
+  // useEffect(() => {
+  //   const newBalance = balances.find(b => b.symbol !== 'BTC' && b.symbol !== 'ETH' && parseFloat(b.balance) > 0);
+  //   if (newBalance) {
+  //     setNotification({
+  //       message: `@cheshirecat tipped you ${displayFiat ? `$${convertCryptoToFiat(parseFloat(newBalance.balance), newBalance.symbol)}` : `${newBalance.balance} ${newBalance.symbol}`}`,
+  //       isVisible: true,
+  //       type: 'success'
+  //     });
+  //   }
+  // }, [balances, displayFiat, convertCryptoToFiat]);
 
   useEffect(() => {
     let autoSpinInterval: NodeJS.Timeout;
@@ -62,12 +92,14 @@ function PortfolioContent() {
     };
   }, [autoSpin, isSpinning, turboMode, betAmount]);
 
-  const handlePlay = (amount: number) => {
+
+  const handlePlay = useCallback((amount: number) => {
     const balance = parseFloat(selectedCrypto.balance);
-    if (balance < amount || amount <= 0) {
-      const rate = exchangeRates[selectedCrypto.symbol] || 1;
+    const cryptoAmount = displayFiat ? parseFloat(convertFiatToCrypto(amount, selectedCrypto.symbol)) : amount;
+    
+    if (balance < cryptoAmount || cryptoAmount <= 0) {
       setNotification({
-        message: `Insufficient balance or invalid bet. You need ${displayFiat ? `$${(amount * rate).toFixed(2)}` : `${amount.toFixed(8)} ${selectedCrypto.symbol}`}`,
+        message: `Insufficient balance or invalid bet. You need ${displayFiat ? `$${amount.toFixed(2)}` : `${cryptoAmount.toFixed(8)} ${selectedCrypto.symbol}`}`,
         isVisible: true,
         type: 'error'
       });
@@ -75,115 +107,126 @@ function PortfolioContent() {
       return false;
     }
     setIsSpinning(true);
-    const newBalance = (balance - amount).toFixed(8);
+    const newBalance = (balance - cryptoAmount).toFixed(8);
     updateBalance(selectedCrypto.symbol, newBalance);
     
     setTimeout(() => {
       setIsSpinning(false);
     }, turboMode ? 1000 : 2000);
     return true;
-  };
+  }, [selectedCrypto, updateBalance, setIsSpinning, turboMode, setNotification, setAutoSpin, displayFiat, convertFiatToCrypto]);
 
-  const handleWin = (multiplier: number) => {
+  const handleWin = useCallback((multiplier: number) => {
     const winAmount = betAmount * multiplier;
+    const cryptoWinAmount = displayFiat 
+      ? parseFloat(convertFiatToCrypto(winAmount, selectedCrypto.symbol)) 
+      : winAmount;
     const currentBalance = parseFloat(selectedCrypto.balance);
-    const newBalance = (currentBalance + winAmount).toFixed(8);
+    const newBalance = (currentBalance + cryptoWinAmount).toFixed(8);
     updateBalance(selectedCrypto.symbol, newBalance);
-    const rate = exchangeRates[selectedCrypto.symbol] || 1;
     setNotification({
-      message: `Congratulations! You won ${displayFiat ? `$${(winAmount * rate).toFixed(2)}` : `${winAmount.toFixed(8)} ${selectedCrypto.symbol}`}`,
+      message: `Congratulations! You won ${
+        displayFiat 
+          ? `$${winAmount.toFixed(2)}` 
+          : `${cryptoWinAmount.toFixed(8)} ${selectedCrypto.symbol}`
+      }`,
       isVisible: true,
       type: 'success'
     });
-  };
+  }, [betAmount, selectedCrypto, updateBalance, setNotification, displayFiat, convertFiatToCrypto]);
+
+  const elementCount = isMobileDevice ? 2 : 3;
+  const orbCount = isMobileDevice ? 1 : 2;
 
   const BackgroundElements = useMemo(() => (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {/* Base gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-black to-purple-950" />
-
-      {/* Animated slot symbols */}
       <div className="absolute inset-0 opacity-20">
-        {[...Array(20)].map((_, index) => (
-          <motion.div
+        {[...Array(elementCount)].map((_, index) => (
+          <div
             key={index}
-            className="absolute"
-            initial={{
+            className="absolute w-10 h-10 hw-accelerate animate-float"
+            style={{
+              animationDelay: `${Math.random() * 20}s`,
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              rotate: Math.random() * 360,
-              scale: Math.random() * 0.5 + 0.5,
-            }}
-            animate={{
-              top: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
-              left: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
-              rotate: [0, 360],
-              scale: [Math.random() * 0.5 + 0.5, Math.random() * 0.5 + 0.5],
-            }}
-            transition={{
-              duration: Math.random() * 20 + 10,
-              repeat: Infinity,
-              ease: "linear",
             }}
           >
             <Image
-              src={index % 3 === 0 ? "/cat.svg" : index % 3 === 1 ? "/dog.svg" : "/fox.svg"}
+              src={index % 2 === 0 ? "/cat.svg" : "/dog.svg"}
               alt="Slot Symbol"
               width={40}
               height={40}
+              loading="lazy"
             />
-          </motion.div>
+          </div>
         ))}
       </div>
-
-      {/* Glowing orbs */}
-      <div className="absolute inset-0">
-        {[...Array(5)].map((_, index) => (
-          <motion.div
-            key={index}
-            className="absolute rounded-full bg-purple-400 opacity-20 blur-xl"
-            style={{
-              width: `${Math.random() * 200 + 100}px`,
-              height: `${Math.random() * 200 + 100}px`,
-            }}
-            initial={{
-              x: `${Math.random() * 100}%`,
-              y: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              x: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
-              y: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
-            }}
-            transition={{
-              duration: Math.random() * 20 + 10,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Subtle grid overlay */}
+      {[...Array(orbCount)].map((_, index) => (
+        <div
+          key={index}
+          className="absolute rounded-full bg-purple-400 opacity-10 blur-xl hw-accelerate animate-float animate-pulse"
+          style={{
+            width: `${Math.random() * 200 + 100}px`,
+            height: `${Math.random() * 200 + 100}px`,
+            animationDuration: `${isMobileDevice ? '45s' : '30s'}, 3s`,
+            animationDelay: `${Math.random() * 30}s, 0s`,
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+          }}
+        />
+      ))}
       <div 
-        className="absolute inset-0 opacity-10"
+        className="absolute inset-0 opacity-5"
         style={{
           backgroundImage: `linear-gradient(to right, #8b5cf6 1px, transparent 1px), linear-gradient(to bottom, #8b5cf6 1px, transparent 1px)`,
-          backgroundSize: '20px 20px',
+          backgroundSize: isMobileDevice ? '60px 60px' : '40px 40px',
         }}
       />
     </div>
-  ), []);
+  ), [isMobileDevice, elementCount, orbCount]);
 
-  const toggleAutoSpin = () => {
-    if (autoSpin) {
-      setAutoSpin(false);
-    } else {
-      setAutoSpin(true);
-      if (!isSpinning) {
+  const toggleAutoSpin = useCallback(() => {
+    setAutoSpin(prev => {
+      if (!prev && !isSpinning) {
         handlePlay(betAmount);
       }
-    }
-  };
+      return !prev;
+    });
+  }, [isSpinning, handlePlay, betAmount]);
+
+  const MemoizedSlotMachine = useMemo(() => (
+    <SlotMachine 
+      onWin={handleWin} 
+      isSpinning={isSpinning} 
+      spinSoundPath="/sounds/spin.mp3"
+      winSoundPath="/sounds/win.mp3"
+      loseSoundPath="/sounds/lose.mp3"
+      updateBalance={updateBalance}
+      selectedCrypto={selectedCrypto}
+      turboMode={turboMode}
+      setAutoSpin={setAutoSpin}
+      convertFiatToCrypto={convertFiatToCrypto}
+      displayFiat={displayFiat}
+    />
+  ), [handleWin, isSpinning, updateBalance, selectedCrypto, turboMode, setAutoSpin]);
+
+  const MemoizedBetInput = useMemo(() => (
+    <BetInput 
+      selectedCrypto={selectedCrypto} 
+      onBetChange={setBetAmount} 
+      onPlay={handlePlay}
+      isSpinning={isSpinning}
+      turboMode={turboMode}
+      onTurboToggle={() => setTurboMode(prev => !prev)}
+      autoSpin={autoSpin}
+      onAutoSpinToggle={toggleAutoSpin}
+      onNotification={(message, type) => setNotification({ message, isVisible: true, type })}
+      displayFiat={displayFiat}
+      convertFiatToCrypto={convertFiatToCrypto}
+      convertCryptoToFiat={convertCryptoToFiat}
+    />
+  ), [selectedCrypto, handlePlay, isSpinning, turboMode, autoSpin, toggleAutoSpin, displayFiat, convertFiatToCrypto, convertCryptoToFiat]);
 
   return (
     <>
@@ -205,17 +248,17 @@ function PortfolioContent() {
             <div className="md:hidden flex justify-center flex-1 max-w-[200px]">
               <WalletDropdown 
                 onNotification={(message, type) => setNotification({ message, isVisible: true, type })}
-                isMobile={true}
+                isMobile={isMobileDevice}
               />
             </div>
             <div className="hidden md:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2">
               <WalletDropdown 
                 onNotification={(message, type) => setNotification({ message, isVisible: true, type })}
-                isMobile={false}
+                isMobile={isMobileDevice}
               />
             </div>
             <div className="hidden md:flex items-center gap-6">
-              {['projects', 'skills', 'contact'].map((item, index) => (
+              {['Projects', 'Skills', 'Contact'].map((item, index) => (
                 <Link
                   key={item}
                   href={`#${item.toLowerCase()}`}
@@ -282,17 +325,7 @@ function PortfolioContent() {
               className="max-w-4xl mx-auto text-center mb-8 sm:mb-0"
             >
               <div className="mb-8 sm:mb-12 relative z-30 mx-auto max-w-full sm:max-w-[90%] md:max-w-[80%] lg:max-w-[70%] xl:max-w-[60%]">
-                <SlotMachine 
-                  onWin={handleWin} 
-                  isSpinning={isSpinning} 
-                  spinSoundPath="/sounds/spin.mp3"
-                  winSoundPath="/sounds/win.mp3"
-                  loseSoundPath="/sounds/lose.mp3"
-                  updateBalance={updateBalance}
-                  selectedCrypto={selectedCrypto}
-                  turboMode={turboMode}
-                  setAutoSpin={setAutoSpin}
-                />
+                {MemoizedSlotMachine}
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 relative glow">
                 <span className="bg-gradient-to-r from-purple-300 to-purple-400 bg-clip-text text-transparent">
@@ -314,20 +347,17 @@ function PortfolioContent() {
               </h1>
               <p className="text-base sm:text-lg md:text-xl text-purple-300/60 mb-6 sm:mb-8 flex items-center justify-center">
                 a sneak peek into my world {' '}
-                <Image src="/cc-logo.svg" alt="Cheshire Cat Logo" width={22} height={22} className="inline-block ml-1" />
+                <Image 
+                  src="/cc-logo.svg" 
+                  alt="Cheshire Cat Logo" 
+                  width={22} 
+                  height={22} 
+                  className="inline-block ml-1" 
+                  priority
+                />
               </p>
               <div className="relative z-30 max-w-md mx-auto">
-                <BetInput 
-                  selectedCrypto={selectedCrypto} 
-                  onBetChange={setBetAmount} 
-                  onPlay={handlePlay}
-                  isSpinning={isSpinning}
-                  turboMode={turboMode}
-                  onTurboToggle={() => setTurboMode(prev => !prev)}
-                  autoSpin={autoSpin}
-                  onAutoSpinToggle={toggleAutoSpin}
-                  onNotification={(message, type) => setNotification({ message, isVisible: true, type })}
-                />
+                {MemoizedBetInput}
               </div>
             </motion.div>
           </div>
@@ -368,7 +398,7 @@ function PortfolioContent() {
                 <br />
                 &nbsp;&nbsp;&#125; <span className="text-purple-500">catch</span> &#123;
                 <br />
-                &nbsp;&nbsp;&nbsp;&nbsp;fugitive = <span className="text-purple-500">true</span><span className="text-purplepurple-600">;</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;fugitive = <span className="text-purple-500">true</span><span className="text-purple-600">;</span>
                 <br />
                 &nbsp;&nbsp;&nbsp;&nbsp;status = <span className="text-green-400">&quot;busto -.-&quot;</span><span className="text-purple-600">;</span>
                 <br />
@@ -398,18 +428,22 @@ assets,
 competition, 
 status 
 &#125;<span className="text-purple-600">;</span>
-<br />
-&#125;
-</code>
+                <br />
+              &#125;
+              </code>
             </Card>
           </div>
         </section>
 
         {/* Projects Section */}
-        <Projects />
+        <Suspense fallback={<div>Loading projects...</div>}>
+          <Projects />
+        </Suspense>
 
         {/* Skills Section */}
-        <Skills />
+        <Suspense fallback={<div>Loading skills...</div>}>
+          <Skills />
+        </Suspense>
 
         {/* Contact Section */}
         <section id="contact" className="py-20 relative overflow-hidden">
@@ -500,7 +534,7 @@ status
       </footer>
     </>
   )
-}
+});
 
 export default function Portfolio() {
   return (
@@ -509,4 +543,3 @@ export default function Portfolio() {
     </WalletProvider>
   )
 }
-

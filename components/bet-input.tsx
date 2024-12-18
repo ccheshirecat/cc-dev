@@ -5,8 +5,6 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { getCryptoIcon } from '@/utils/getCryptoIcon'
-import { useWallet } from '@/contexts/WalletContext'
-import { exchangeRates } from '@/utils/exchangeRates'
 import { Zap, PlayCircle, Pause } from 'lucide-react'
 
 interface BetInputProps {
@@ -23,6 +21,9 @@ interface BetInputProps {
   onNotification: (message: string, type: 'success' | 'error') => void
   autoSpin: boolean
   onAutoSpinToggle: () => void
+  displayFiat: boolean
+  convertFiatToCrypto: (amount: number, symbol: string) => string
+  convertCryptoToFiat: (amount: number, symbol: string) => string
 }
 
 const MAX_BET_USD = 10;
@@ -36,16 +37,17 @@ export function BetInput({
   onTurboToggle,
   onNotification,
   autoSpin,
-  onAutoSpinToggle
+  onAutoSpinToggle,
+  displayFiat,
+  convertFiatToCrypto,
+  convertCryptoToFiat
 }: BetInputProps) {
   const [amount, setAmount] = useState('')
   const [isInvalid, setIsInvalid] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const { displayFiat } = useWallet()
 
   const getMaxBet = () => {
-    const rate = exchangeRates[selectedCrypto.symbol] || 1
-    return displayFiat ? MAX_BET_USD : MAX_BET_USD / rate
+    return displayFiat ? MAX_BET_USD : parseFloat(convertFiatToCrypto(MAX_BET_USD, selectedCrypto.symbol))
   }
 
   const handleAmountChange = (value: string) => {
@@ -53,7 +55,7 @@ export function BetInput({
     const parts = sanitizedValue.split('.')
     let newValue = parts[0]
     if (parts.length > 1) {
-      newValue += '.' + parts[1].slice(0, 8) // 8 decimal places
+      newValue += '.' + parts[1].slice(0, displayFiat ? 2 : 8)
     }
 
     setAmount(newValue)
@@ -61,9 +63,7 @@ export function BetInput({
 
     const numericAmount = parseFloat(newValue)
     if (!isNaN(numericAmount)) {
-      const rate = exchangeRates[selectedCrypto.symbol] || 1
-      const cryptoAmount = displayFiat ? numericAmount / rate : numericAmount
-      onBetChange(cryptoAmount)
+      onBetChange(numericAmount)
     } else {
       onBetChange(0)
     }
@@ -72,24 +72,46 @@ export function BetInput({
   const handleBet = () => {
     const betAmount = parseFloat(amount)
     if (betAmount > 0) {
-      const rate = exchangeRates[selectedCrypto.symbol] || 1
-      const cryptoAmount = displayFiat ? betAmount / rate : betAmount
-      if (cryptoAmount > getMaxBet()) {
+      const maxBet = getMaxBet()
+      if (betAmount > maxBet) {
         setIsInvalid(true)
         onNotification(
-          `maximum bet is ${
+          `Maximum bet is ${
             displayFiat
               ? `$${MAX_BET_USD.toFixed(2)}`
-              : `${getMaxBet().toFixed(8)} ${selectedCrypto.symbol}`
+              : `${maxBet.toFixed(8)} ${selectedCrypto.symbol}`
           }`,
           'error'
         )
       } else {
-        setIsInvalid(false)
-        onPlay(cryptoAmount)
+        const cryptoAmount = displayFiat ? parseFloat(convertFiatToCrypto(betAmount, selectedCrypto.symbol)) : betAmount
+        if (cryptoAmount > parseFloat(selectedCrypto.balance)) {
+          setIsInvalid(true)
+          onNotification(
+            `Insufficient balance. You have ${
+              displayFiat
+                ? `$${convertCryptoToFiat(parseFloat(selectedCrypto.balance), selectedCrypto.symbol)}`
+                : `${selectedCrypto.balance} ${selectedCrypto.symbol}`
+            }`,
+            'error'
+          )
+        } else {
+          setIsInvalid(false)
+          onPlay(displayFiat ? betAmount : cryptoAmount)
+        }
       }
     }
   }
+
+  const handleDoubleBet = () => {
+    const newAmount = (parseFloat(amount) * 2).toString();
+    handleAmountChange(newAmount);
+  };
+
+  const handleHalfBet = () => {
+    const newAmount = (parseFloat(amount) / 2).toString();
+    handleAmountChange(newAmount);
+  };
 
   useEffect(() => {
     if (inputRef.current) {
@@ -97,15 +119,19 @@ export function BetInput({
     }
   }, [displayFiat])
 
+  const formatBalance = (balance: string) => {
+    const numericBalance = parseFloat(balance);
+    return displayFiat
+      ? `$${convertCryptoToFiat(numericBalance, selectedCrypto.symbol)}`
+      : `${numericBalance.toFixed(8)} ${selectedCrypto.symbol}`;
+  };
+
   return (
     <div className="w-full max-w-md mx-auto space-y-4 relative z-20">
       <div className="flex items-center justify-between text-sm">
         <div className="text-purple-300">bet amount</div>
         <div className="text-purple-400">
-          balance:{' '}
-          {displayFiat
-            ? `$${(parseFloat(selectedCrypto.balance) * (exchangeRates[selectedCrypto.symbol] || 1)).toFixed(2)}`
-            : `${parseFloat(selectedCrypto.balance).toFixed(8)} ${selectedCrypto.symbol}`}
+          balance: {formatBalance(selectedCrypto.balance)}
         </div>
       </div>
 
@@ -119,11 +145,6 @@ export function BetInput({
               height={20}
               unoptimized
               className="z-20"
-              onError={() =>
-                console.error(
-                  `Failed to load icon for ${selectedCrypto.symbol}: ${getCryptoIcon(selectedCrypto.symbol)}`
-                )
-              }
             />
           )}
           {displayFiat && <span className="text-white text-base sm:text-lg">$</span>}
@@ -137,9 +158,28 @@ export function BetInput({
           className={`w-full pl-14 pr-24 py-4 sm:py-6 bg-purple-900/30 text-white text-base sm:text-lg ${
             isInvalid ? 'border-red-500' : 'border-purple-700/50'
           }`}
-          placeholder="say bye to $"
+          placeholder={`say bye to ${displayFiat ? 'USD' : selectedCrypto.symbol}`}
           inputMode="decimal"
         />
+
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-purple-300 hover:text-purple-100 hover:bg-purple-800/50"
+            onClick={handleHalfBet}
+          >
+            1/2
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-purple-300 hover:text-purple-100 hover:bg-purple-800/50"
+            onClick={handleDoubleBet}
+          >
+            2x
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-2 items-center">
@@ -179,3 +219,4 @@ export function BetInput({
     </div>
   )
 }
+
