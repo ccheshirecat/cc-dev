@@ -1,8 +1,9 @@
 'use client'
 
 import { motion } from "framer-motion"
-import { ExternalLink, Github } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import Image from "next/image"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -33,7 +34,7 @@ export default function Projects() {
     image: '/perrybrady-thumbnail.png?height=200&width=300',
      tags: ["Astro", "React", "Tailwind CSS", "Framer Motion"],
      links: {
-      link: 'https://perry-brady.vercel.app',
+      live: 'https://perry-brady.vercel.app',
     },
   }
  ]
@@ -52,8 +53,7 @@ export default function Projects() {
            projects
          </h2>
          <p className="text-purple-300 max-w-xl mx-auto">
-          some examples of what i get up to when im bored and have no bullet
-
+           some examples of what i get up to when im bored and have no bullet
          </p>
        </motion.div>
        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -88,10 +88,14 @@ export default function Projects() {
                    ))}
                  </div>
                  <div className="flex items-center gap-3">
-                <Button size="sm" variant="ghost" className="text-purple-400/60 hover:text-purple-300 hover:bg-purple-900 transition-colors duration-300">
-                     <ExternalLink className="w-4 h-4 mr-2" />
-                     Demo
-                   </Button>
+                   <Link href={project.links.live} passHref legacyBehavior>
+                     <Button asChild size="sm" variant="ghost" className="text-purple-400/60 hover:text-purple-300 hover:bg-purple-900 transition-colors duration-300">
+                       <a target="_blank" rel="noopener noreferrer">
+                         <ExternalLink className="w-4 h-4 mr-2" />
+                         Demo
+                       </a>
+                     </Button>
+                   </Link>
                  </div>
                </div>
              </Card>
@@ -102,4 +106,3 @@ export default function Projects() {
    </section>
  )
 }
-
