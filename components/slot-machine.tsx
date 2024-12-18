@@ -326,8 +326,10 @@ export function SlotMachine({ onWin, isSpinning, spinSoundPath, winSoundPath, lo
   <Image
     src={`https://cheshirecat.dev/cdn-cgi/image/width=150,height=150,format=webp,quality=85/${symbols[spinning[index] ? spinningSymbols[index] : reel]}`}
     alt={`Slot symbol ${spinning[index] ? spinningSymbols[index] : reel}`}
-    className="w-36 h-36 object-contain"
-    />
+    width={150}
+    height={150}
+    className="w-full h-full object-contain"
+  />
 </motion.div>
 
               </AnimatePresence>
