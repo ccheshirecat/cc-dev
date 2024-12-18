@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
-
 import { Card } from "@/components/ui/card"
 import { WalletDropdown } from "@/components/wallet-dropdown"
 import { BetInput } from '@/components/bet-input'
@@ -22,12 +21,10 @@ import { isMobile } from '@/utils/isMobile'
 const Projects = dynamic(() => import('./projects'), { 
   ssr: false, 
   loading: () => <p>loading projects...</p>,
-  suspense: true 
 })
 const Skills = dynamic(() => import('@/app/skills').then(mod => mod.default), {
   ssr: false,
   loading: () => <p>loading skills...</p>,
-  suspense: true
 })
 
 const PortfolioContent = memo(function PortfolioContent() {
