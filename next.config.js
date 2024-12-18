@@ -3,6 +3,12 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     domains: ['shuffle.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cheshirecat.dev',
+      },
+    ],
   },
 }
 
