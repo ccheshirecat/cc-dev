@@ -18,11 +18,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen bg-black text-purple-300 relative`}>
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 overflow-hidden">
           <Image
             src={bgImage}
             alt="Background"
-            layout="fill"
+            width={1920}
+            height={1080}
             style={{ objectFit: 'none', objectPosition: 'center' }} // Center the image
             loading="lazy"
             priority={false}
